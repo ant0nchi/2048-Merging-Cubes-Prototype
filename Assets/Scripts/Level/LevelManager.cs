@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -8,11 +7,11 @@ public class LevelManager : MonoBehaviour
 {
     public Canvas gameOverCanvas;
     public Text scoreText;
-    public static ColorPalette currentPalette { get; protected set; }
+    public static Color[] currentPalette { get; protected set; }
     public static List<int> availableValues;
     public InterAd interAd;
 
-    string currentPaletteName = "StandartPalette";
+    string currentPaletteName = "StandardPalette";
     private int score;
     private int counter = 0;
     private int maxValue = 2;
@@ -25,17 +24,19 @@ public class LevelManager : MonoBehaviour
         EventManager.OnCubePushed += UpdateCounter;
 
         availableValues = new List<int>() { 2 };
-        LoadPalette(currentPaletteName);
+        LoadPalette();
         gameOverCanvas.enabled = false;
     }
 
-    void LoadPalette(string paletteName)
+    void LoadPalette()
     {
-        string path = Application.dataPath + "/" + paletteName + ".json";
-        if (File.Exists(path))
+        var palettes = Resources.LoadAll<ColorPalette>("Palettes");
+        foreach (var palette in palettes)
         {
-            string json = File.ReadAllText(path);
-            currentPalette = JsonUtility.FromJson<ColorPalette>(json);
+            if (palette.paletteName == currentPaletteName)
+            {
+                currentPalette = palette.palette;
+            }
         }
     }
 

@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Cube
   - SelectedCube
+  - EndWall
   layers:
   - Default
   - TransparentFX

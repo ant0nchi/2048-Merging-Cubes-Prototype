@@ -1,5 +1,8 @@
-﻿[System.Serializable]
-public class ColorPalette
+﻿using UnityEngine;
+
+[CreateAssetMenu(fileName = "New Palette", menuName = "Palette")]
+public class ColorPalette: ScriptableObject
 {
-    public string[] palette = new string[12];
+    public string paletteName;
+    public Color[] palette;
 }

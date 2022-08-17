@@ -4,6 +4,7 @@ using UnityEngine;
 public class Controller : MonoBehaviour
 {
     public GameObject cubePrefab;
+    public GameObject[] bonusCubes;
 
     [SerializeField] Vector3 startPositon = new Vector3(0, 0, 0);
 
@@ -12,15 +13,16 @@ public class Controller : MonoBehaviour
     private float pushPower = 12f;
     private GameObject selectedCube = null;
     private Rigidbody selectedCubeRb;
-    private Cube cube;
+    private StandardCube cube;
 
+    private bool onUi = false;
     private float stationaryTouchX;
     private float movingLimit = 1.8f;
     private float movingCoeff = 0.15f;
 
     void Start()
     {
-        GenerateCube();
+        ChooseStandrdCube();
     }
 
     void Update()
@@ -40,18 +42,23 @@ public class Controller : MonoBehaviour
             }
             else if (touch.phase == TouchPhase.Ended && selectedCube != null)
             {
-                PushCube();
+                if (!onUi)
+                {
+                    PushCube();
+                    onUi = false;
+                }
+                else if (onUi)
+                {
+                    onUi = false;
+                }
             }
         }
     }
 
-    void GenerateCube()
+    void GenerateCube(GameObject cube)
     {
-        selectedCube = Instantiate(cubePrefab, startPositon, cubePrefab.transform.rotation);
+        selectedCube = Instantiate(cube, startPositon, cubePrefab.transform.rotation);
         selectedCubeRb = selectedCube.GetComponent<Rigidbody>();
-        cube = selectedCube.GetComponent<Cube>();
-        int randomIndex = Random.Range(0, LevelManager.availableValues.Count);
-        cube.ChangeValue(LevelManager.availableValues[randomIndex]);
     }
 
     void MoveCube()
@@ -79,11 +86,35 @@ public class Controller : MonoBehaviour
         EventManager.CubePushed();
     }
 
+    void ChooseStandrdCube()
+    {
+        GenerateCube(cubePrefab);
+        cube = selectedCube.GetComponent<StandardCube>();
+        int randomIndex = Random.Range(0, LevelManager.availableValues.Count);
+        cube.ChangeValue(LevelManager.availableValues[randomIndex]);
+    }
+
+    public void ChooseBonusCube(int index)
+    {
+        onUi = true;
+
+        if (selectedCube != null)
+        {
+            Destroy(selectedCube);
+            selectedCube = null;
+            GameObject bonusCubePrefab = bonusCubes[index];
+            GenerateCube(bonusCubePrefab);
+        }
+    }
+
     private IEnumerator DelayGeneration(GameObject lastSelectedCube)
     {
         yield return new WaitForSeconds(1);
-        lastSelectedCube.tag = "Cube";
-        GenerateCube();
+        if (lastSelectedCube)
+        {
+            lastSelectedCube.tag = "Cube";
+        }
+        ChooseStandrdCube();
     }
 
     void OnDrawGizmosSelected()
